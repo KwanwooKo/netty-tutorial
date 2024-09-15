@@ -3,15 +3,16 @@ package echo.client;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.util.CharsetUtil;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-public class EchoClientHandler extends ChannelInboundHandlerAdapter {
+public class EchoClientInboundHandler extends ChannelInboundHandlerAdapter {
 
-//    private String msg = "Hello    Kwanwoo I want to test message";
-    private BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+//    private final String msg = "Hello    Kwanwoo I want to test message";
+    private final BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws IOException {
@@ -23,18 +24,18 @@ public class EchoClientHandler extends ChannelInboundHandlerAdapter {
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
-                ByteBuf message = ctx.alloc().buffer(4);    // 이 크기보다 더 많이 들어오면 자동으로 확장됨
-                message.writeBytes(msg.getBytes());      // 여기서 message 작성 -> channelRead 메서드에서 처리
-                ctx.writeAndFlush(message);
+                ByteBuf byteBuf = ctx.alloc().buffer();    // 이 크기보다 더 많이 들어오면 자동으로 확장됨
+                byteBuf.writeBytes(msg.getBytes());      // 여기서 message 작성 -> channelRead 메서드에서 처리
+                ctx.writeAndFlush(byteBuf);              // 아마 byteBuf 의 크기를 자동지정해서 flush까지 붙여야 하는듯.
+                                                         // 실제 전문에서는 길이 이용해서 통신하기 때문에 flush 빼야할 수도?
             }
         }).start();
-        System.out.println("It is not a Thread");       // Thread 로직 이외는 바로 돌아가고, block I/O는 스레드가 대기
     }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         ByteBuf in = (ByteBuf) msg;
-        System.out.println("Received: " + in.toString(io.netty.util.CharsetUtil.UTF_8));
+        System.out.println("Client Received: " + in.toString(CharsetUtil.UTF_8));
     }
 
     @Override
@@ -43,3 +44,4 @@ public class EchoClientHandler extends ChannelInboundHandlerAdapter {
         ctx.close();
     }
 }
+

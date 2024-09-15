@@ -8,8 +8,6 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
 
 public class EchoServer {
 
@@ -26,12 +24,13 @@ public class EchoServer {
             ServerBootstrap bootstrap = new ServerBootstrap();
             bootstrap.group(bossGroup, workerGroup)
                      .channel(NioServerSocketChannel.class)
-                     .handler(new LoggingHandler(LogLevel.INFO))
+//                     .handler(new LoggingHandler(LogLevel.INFO))
                      .childHandler(new ChannelInitializer<SocketChannel>() {
                          @Override
                          public void initChannel(SocketChannel ch) {
                              ChannelPipeline pipeline = ch.pipeline();
-                             pipeline.addLast(new EchoServerHandler());
+                             pipeline.addLast(new EchoServerOutboundHandler());
+                             pipeline.addLast(new EchoServerInboundHandler());
                          }
                      });
 
@@ -44,6 +43,6 @@ public class EchoServer {
     }
 
     public static void main(String[] args) throws Exception {
-        new EchoServer(8080).start();
+        new EchoServer(8888).start();
     }
 }

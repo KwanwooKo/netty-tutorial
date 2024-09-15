@@ -8,8 +8,6 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
 
 public class EchoClient {
 
@@ -27,12 +25,15 @@ public class EchoClient {
             Bootstrap bootstrap = new Bootstrap();
             bootstrap.group(group)
                      .channel(NioSocketChannel.class)
-                     .handler(new LoggingHandler(LogLevel.INFO))
+//                     .handler(new LoggingHandler(LogLevel.INFO))
                      .handler(new ChannelInitializer<SocketChannel>() {
                          @Override
                          public void initChannel(SocketChannel ch) {
                              ChannelPipeline pipeline = ch.pipeline();
-                             pipeline.addLast(new EchoClientHandler());
+                             // Client, Server 둘 다 OutboundHandler 가 먼저 pipeline에 들어와야돼
+                             // 왜...?
+                             pipeline.addLast(new EchoClientOutboundHandler());
+                             pipeline.addLast(new EchoClientInboundHandler());
                          }
                      });
 
@@ -44,6 +45,6 @@ public class EchoClient {
     }
 
     public static void main(String[] args) throws Exception {
-        new EchoClient("localhost", 8080).start();
+        new EchoClient("localhost", 8888).start();
     }
 }
