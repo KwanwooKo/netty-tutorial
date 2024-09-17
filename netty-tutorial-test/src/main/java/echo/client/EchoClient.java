@@ -9,12 +9,16 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 
+import java.io.*;
+
 public class EchoClient {
 
     private final String host;
     private final int port;
+//    private final BufferedReader br = new BufferedReader(new FileReader("src/main/resources/message.txt"));
+    private final BufferedReader br = new BufferedReader(new FileReader("src/main/resources/message-no-lines.txt"));
 
-    public EchoClient(String host, int port) {
+    public EchoClient(String host, int port) throws FileNotFoundException {
         this.host = host;
         this.port = port;
     }
@@ -33,7 +37,7 @@ public class EchoClient {
                              // Client, Server 둘 다 OutboundHandler 가 먼저 pipeline에 들어와야돼
                              // 왜...?
                              pipeline.addLast(new EchoClientOutboundHandler());
-                             pipeline.addLast(new EchoClientInboundHandler());
+                             pipeline.addLast(new EchoClientInboundHandler(br));
                          }
                      });
 
